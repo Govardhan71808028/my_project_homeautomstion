@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Home Control</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 90px;
+      height: 54px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 40px;
+      width: 40px;
+      left: 8px;
+      bottom: 8px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+    input:checked + .slider:before {
+      transform: translateX(36px);
+    }
+    .relay {
+      border: 1px solid #e0d1d1;
+      padding: 1em;
+      text-align: center;
+      margin: 1em;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+      border: 1px solid rgb(43, 40, 40);
+    }
+    .relay:hover {
+      transform: translateY(-5px);
+    }
+    .logo, .pic1, .pic2, .pic3, .pic4 {
+      display: block;
+      margin: 20px auto;
+      width: 150px;
+      height: auto;
+      border: 3px solid rgb(236, 221, 8);
+      border-radius: 10px;
+    }
+    .pic1, .pic2, .pic3, .pic4 {
+      border-color: rgb(0, 255, 85);
+    }
+    #flameStatus, #sensorStatus, #vibrationStatus {
+      font-weight: bold;
+      font-size: 30px;
+    }
+    #flameStatus {
+      color: red;
+    }
+    #sensorStatus {
+      color: rgb(250, 13, 13);
+    }
+    #vibrationStatus {
+      color: red; /* Changed from yellow to red */
+    }
+  </style>
+</head>
+<body class="bg-dark text-white">
+  <div class="container">
+    <section class="my-5">
+      <h1 class="bg-primary text-white p-3 rounded d-inline-block">SMART HOME CONTROL</h1>
+    </section>
+
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <h2>Temperature: <span id="temperature" class="text-info">Loading...</span></h2>
+      </div>
+      <div class="col-md-6">
+        <h2>Humidity: <span id="humidity" class="text-info">Loading...</span></h2>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <h2>Moisture Level: <span id="moistureStatus" class="text-info">Loading...</span></h2>
+      </div>
+      <div class="col-md-6">
+        <h2>Flame: <span id="flameStatus" class="text-danger">Checking...</span></h2>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <h2>Earthquake: <span id="vibrationStatus" class="text-danger">Checking...</span></h2>
+      </div>
+      <div class="col-md-6">
+        <h2>Gas: <span id="sensorStatus" class="text-danger">Checking...</span></h2>
+      </div>
+    </div>
+
+    <div class="row justify-content-center mb-5">
+      <div class="col-md-3">
+        <div class="relay">
+          <h2>Hall Light</h2>
+          <label class='switch'>
+            <input type='checkbox' onchange='toggleRelay(1)'>
+            <span class='slider'></span>
+          </label>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="relay">
+          <h2>Bedroom Light</h2>
+          <label class='switch'>
+            <input type='checkbox' onchange='toggleRelay(2)'>
+            <span class='slider'></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+   
+
+  <script>
+    function toggleRelay(relay) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/toggle?relay=' + relay, true);
+      xhr.send();
+    }
+
+    function updateSensorValues() {
+      fetch('/sensorValues')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('temperature').innerText = data.temperature + " °C";
+          document.getElementById('humidity').innerText = data.humidity + " %";
+          document.getElementById('moistureStatus').innerText = data.moisture + " %";
+          document.getElementById('vibrationStatus').innerText = data.vibrationStatus ? "Detected" : "Normal";
+          document.getElementById('sensorStatus').innerText = data.gasSensorStatus ? "Leak Detected" : "Safe";
+          document.getElementById('flameStatus').innerText = data.flameDetected ? "Yes" : "No";
+        });
+    }
+
+    setInterval(updateSensorValues, 2000);
+  </script>
+</body>
+</html>
